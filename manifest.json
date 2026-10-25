@@ -1,0 +1,12 @@
+{
+  "name": "A-Level Study Tracker",
+  "short_name": "A-Level",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fff7ec",
+  "theme_color": "#ff7a59",
+  "icons": [
+    { "src": "icon.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
