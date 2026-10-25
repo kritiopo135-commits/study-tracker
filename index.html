@@ -85,6 +85,12 @@ input{flex:1;min-width:200px}
 #bubble.on{display:block}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;font-weight:600;display:none;z-index:10;max-width:90%;text-align:center}
 .toast.on{display:block}
+#musicFab{position:fixed;left:14px;bottom:14px;width:56px;height:56px;border-radius:50%;background:var(--grad);color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 8px 20px rgba(0,0,0,.25);cursor:grab;touch-action:none;user-select:none;z-index:8}
+#musicPanel{position:fixed;left:14px;bottom:80px;width:300px;max-width:calc(100vw - 28px);background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:18px;padding:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);display:none;z-index:8}
+#musicPanel.on{display:block}
+#musicPanel .mp-row{display:flex;gap:6px;align-items:center;margin:6px 0;flex-wrap:wrap}
+#musicPanel input{flex:1;min-width:120px;font-size:13px;padding:7px}
+#musicPanel button{padding:7px 10px;font-size:13px}
 </style>
 </head>
 <body>
@@ -281,6 +287,46 @@ function musicHtml(){
     <p class="muted" style="font-size:12px">ผมไม่สามารถฝังเพลงให้เล่นในหน้าแอปได้ เพราะเว็บที่โฮสต์แอปบล็อกการฝัง YouTube/Spotify ไว้ จึงใช้ลิงก์เปิดในแท็บใหม่แทน</p>`;
 }
 
+// ===== เพลงแบบเสียงล้วน (ซ่อนวิดีโอ ควบคุมด้วยปุ่มลอย) =====
+const MUSIC={player:null,ready:false,pending:null};
+function loadYT(){if(window.YT&&YT.Player)return;const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s)}
+window.onYouTubeIframeAPIReady=function(){MUSIC.ready=true;if(MUSIC.pending){mLoad(MUSIC.pending);MUSIC.pending=null}};
+function mParse(url){try{const u=new URL(url.trim());const list=u.searchParams.get('list')||'';let id=u.hostname==='youtu.be'?u.pathname.slice(1):(u.hostname.includes('youtube.com')?(u.searchParams.get('v')||''):'');return {id,list}}catch(e){return {id:'',list:''}}}
+function mStatus(t){const el=$('#mpStatus');if(el)el.textContent=t}
+function mLoad(url){
+  const p=mParse(url);
+  if(!p.id&&!p.list){toast('ลิงก์นี้ใช้ไม่ได้ ต้องเป็นลิงก์ YouTube');return}
+  state.music=url;save();
+  if(!MUSIC.ready){MUSIC.pending=url;mStatus('กำลังโหลดตัวเล่น...');return}
+  if(MUSIC.player&&MUSIC.player.loadPlaylist&&p.list){MUSIC.player.loadPlaylist({list:p.list,listType:'playlist'});mStatus('โหลดเพลย์ลิสต์แล้ว กดเล่นได้เลย');return}
+  if(MUSIC.player&&p.id&&!p.list){MUSIC.player.cueVideoById(p.id);mStatus('โหลดเพลงแล้ว กดเล่นได้เลย');return}
+  if(MUSIC.player&&MUSIC.player.destroy)MUSIC.player.destroy();
+  const vars={playsinline:1};if(p.list){vars.listType='playlist';vars.list=p.list}
+  const opts={height:'1',width:'1',playerVars:vars,events:{onReady:()=>mStatus('พร้อมเล่น'),onStateChange:e=>mStatus(e.data===1?'กำลังเล่น':e.data===2?'หยุดชั่วคราว':'')}};
+  if(!p.list)opts.videoId=p.id;
+  MUSIC.player=new YT.Player('ytHost',opts);
+}
+function buildMusic(){
+  const fab=document.createElement('div');fab.id='musicFab';fab.title='เพลง · แตะเพื่อเปิด ลากเพื่อย้าย';fab.textContent='🎵';document.body.appendChild(fab);
+  const panel=document.createElement('div');panel.id='musicPanel';
+  panel.innerHTML='<div class="mp-row" style="justify-content:space-between"><b>🎵 เพลงระหว่างอ่าน</b><button id="mpX" class="b3">✕</button></div>'+
+    '<div class="mp-row"><input id="mpUrl" placeholder="วางลิงก์ YouTube" value="'+esc(state.music||'')+'"><button id="mpLoad" class="b1">โหลด</button></div>'+
+    '<div class="mp-row" style="justify-content:center"><button id="mpPrev" class="b3">⏮</button><button id="mpPlay" class="b2">▶ เล่น</button><button id="mpPause" class="b3">⏸</button><button id="mpNext" class="b3">⏭</button></div>'+
+    '<div class="muted" id="mpStatus" style="font-size:12px"></div>';
+  document.body.appendChild(panel);
+  const host=document.createElement('div');host.id='ytHost';host.style.cssText='position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;left:-10px;top:-10px';document.body.appendChild(host);
+  $('#mpX').onclick=()=>panel.classList.remove('on');
+  $('#mpLoad').onclick=()=>mLoad($('#mpUrl').value);
+  $('#mpUrl').onkeydown=e=>{if(e.key==='Enter')mLoad($('#mpUrl').value)};
+  $('#mpPlay').onclick=()=>{if(MUSIC.player&&MUSIC.player.playVideo)MUSIC.player.playVideo();else toast('โหลดเพลงก่อนนะ')};
+  $('#mpPause').onclick=()=>{if(MUSIC.player&&MUSIC.player.pauseVideo)MUSIC.player.pauseVideo()};
+  $('#mpPrev').onclick=()=>{if(MUSIC.player&&MUSIC.player.previousVideo)MUSIC.player.previousVideo()};
+  $('#mpNext').onclick=()=>{if(MUSIC.player&&MUSIC.player.nextVideo)MUSIC.player.nextVideo()};
+  let drag=null;
+  fab.addEventListener('pointerdown',e=>{const r=fab.getBoundingClientRect();drag={x:e.clientX-r.left,y:e.clientY-r.top,sx:e.clientX,sy:e.clientY,moved:false};fab.setPointerCapture(e.pointerId)});
+  fab.addEventListener('pointermove',e=>{if(!drag)return;if(Math.abs(e.clientX-drag.sx)+Math.abs(e.clientY-drag.sy)>6)drag.moved=true;if(drag.moved){const x=Math.min(window.innerWidth-56,Math.max(0,e.clientX-drag.x)),y=Math.min(window.innerHeight-56,Math.max(0,e.clientY-drag.y));fab.style.left=x+'px';fab.style.top=y+'px';fab.style.bottom='auto';panel.style.left=x+'px';panel.style.top=Math.max(8,y-290)+'px';panel.style.bottom='auto'}});
+  fab.addEventListener('pointerup',()=>{if(!drag)return;const moved=drag.moved;drag=null;if(!moved)panel.classList.toggle('on')});
+}
 // ===== หน้าหลัก =====
 function render(){
   if(view!=='home'){renderCov();return}
@@ -316,7 +362,6 @@ function render(){
   <div class="card"><h2>🗓 ปฏิทินแผนอ่าน</h2>${calendarHtml()}${daySel()}</div>
   ${od.length?`<div class="card"><h2>⏰ บทค้าง (${od.length})</h2>${od.slice(0,12).map(it=>`<div class="item"><div><span class="badge" style="background:${SUBJ[it.key][1]}">${SUBJ[it.key][0]}</span><small>${fdate(it.date)} · ${esc(it.topic)}</small></div><button class="b1" data-act="focus" data-id="${it.id}">ทำเลย</button></div>`).join('')}${od.length>12?`<p class="muted">และอีก ${od.length-12} บท</p>`:''}</div>`:''}
   <div class="card"><button class="b1" data-act="openCov" style="width:100%">🔍 ตรวจความครอบคลุมรายวิชา</button></div>
-  <div class="card"><h2>🎵 เพลงระหว่างอ่าน</h2>${musicHtml()}</div>
   <div class="card"><h2>⚙️ ตั้งค่า</h2>
     <div class="row l">
       <button class="b3" data-act="theme" data-v="sunny">☀️ ครีมส้ม</button>
@@ -419,6 +464,7 @@ document.addEventListener('click',e=>{
 });
 $('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeQuiz()});
 
+buildMusic();loadYT();if(state.music)MUSIC.pending=state.music;
 if(state.mascot)mascotImg=state.mascot;
 renderMascot();
 render();
