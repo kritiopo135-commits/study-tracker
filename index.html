@@ -307,8 +307,7 @@ function mLoad(url){
   MUSIC.player=new YT.Player('ytHost',opts);
 }
 function buildMusic(){
-  const fab=document.createElement('div');fab.id='musicFab';fab.title='เพลง · แตะเพื่อเปิด ลากเพื่อย้าย';fab.textContent='🎵';document.body.appendChild(fab);
-  const panel=document.createElement('div');panel.id='musicPanel';
+  const fab=document.createElement('div');fab.id='musicFab';fab.title='เพลง · แตะเพื่อเปิด ลากเพื่อย้าย';fab.textContent='🎵';const panel=document.createElement('div');panel.id='musicPanel';
   panel.innerHTML='<div class="mp-row" style="justify-content:space-between"><b>🎵 เพลงระหว่างอ่าน</b><button id="mpX" class="b3">✕</button></div>'+
     '<div class="mp-row"><input id="mpUrl" placeholder="วางลิงก์ YouTube" value="'+esc(state.music||'')+'"><button id="mpLoad" class="b1">โหลด</button></div>'+
     '<div class="mp-row" style="justify-content:center"><button id="mpPrev" class="b3">⏮</button><button id="mpPlay" class="b2">▶ เล่น</button><button id="mpPause" class="b3">⏸</button><button id="mpNext" class="b3">⏭</button></div>'+
