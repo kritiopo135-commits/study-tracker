@@ -85,8 +85,8 @@ input{flex:1;min-width:200px}
 #bubble.on{display:block}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;font-weight:600;display:none;z-index:10;max-width:90%;text-align:center}
 .toast.on{display:block}
-#musicFab{position:fixed;left:14px;bottom:14px;width:56px;height:56px;border-radius:50%;background:var(--grad);color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 8px 20px rgba(0,0,0,.25);cursor:grab;touch-action:none;user-select:none;z-index:8}
-#musicPanel{position:fixed;left:14px;bottom:80px;width:300px;max-width:calc(100vw - 28px);background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:18px;padding:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);display:none;z-index:8}
+#musicFab{display:none;position:fixed;left:14px;bottom:14px;width:56px;height:56px;border-radius:50%;background:var(--grad);color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 8px 20px rgba(0,0,0,.25);cursor:grab;touch-action:none;user-select:none;z-index:8}
+#musicPanel{position:fixed;right:14px;bottom:270px;width:300px;max-width:calc(100vw - 28px);background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:18px;padding:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);display:none;z-index:8}
 #musicPanel.on{display:block}
 #musicPanel .mp-row{display:flex;gap:6px;align-items:center;margin:6px 0;flex-wrap:wrap}
 #musicPanel input{flex:1;min-width:120px;font-size:13px;padding:7px}
@@ -135,7 +135,7 @@ const BANK={
  {q:"วัตถุหยุดนิ่งบนพื้นราบ แรงที่พื้นกระทำต่อวัตถุในแนวดิ่งเป็นอย่างไรเมื่อเทียบกับน้ำหนัก (ไม่มีแรงอื่น)",c:["มากกว่าน้ำหนัก","น้อยกว่าน้ำหนัก","เท่ากับน้ำหนัก ทิศขึ้น","เป็นศูนย์"],a:2,ex:"วัตถุอยู่นิ่ง แรงลัพธ์เป็นศูนย์ แรงปฏิกิริยาจากพื้นจึงเท่ากับน้ำหนักและมีทิศขึ้น",src:"สมดุลของแรง (ตำราฟิสิกส์พื้นฐาน)"}
 ]
 };
-const MOTTO=["วันนี้ทำแค่ 1 บทก็เก่งแล้วนะ 💪","ทุกบทที่จบคือก้าวใกล้ฝันขึ้นอีกก้าว ✨","พักได้ แต่อย่าหยุดนะ เธอทำได้!","ค่อย ๆ ไป ไม่ต้องรีบ ขอแค่ไม่ทิ้งวันไหน 🌱","หมอในฝันกำลังรอเธออยู่นะ 🩺","เก่งมากที่เปิดแอปมาอ่านวันนี้ 🥹","ผิดได้ ทบทวนได้ แค่อย่ายอมแพ้ 📚","เหนื่อยก็พักแป๊บนึง แล้วกลับมาสู้ต่อ 🌟"];
+
 const defaults={done:{},sec:{},quiz:{},theme:'sunny',remHour:19,notif:false,lastRemind:'',lastOverdue:'',music:'',calM:null,target:60,mascot:'',mpos:null};
 let view='home';let state=load(),run=null,focus=null,calSel=null,calView=null,quizItem=null,quizState=null,mascotImg=null,targetWarned={};
 
@@ -410,21 +410,14 @@ function renderMascot(){
   m.innerHTML=mascotImg?`<img src="${mascotImg}" alt="">`:DEFAULT_MASCOT;
   if(state.mpos){m.style.left=state.mpos.x+'px';m.style.top=state.mpos.y+'px';m.style.right='auto';m.style.bottom='auto'}
 }
-function showBubble(){
-  const b=$('#bubble'),m=$('#mascot');
-  b.textContent=MOTTO[Math.floor(Math.random()*MOTTO.length)];
-  const r=m.getBoundingClientRect();
-  const left=Math.min(window.innerWidth-240,Math.max(8,r.left-60)),top=Math.max(8,r.top-90);
-  b.style.left=left+'px';b.style.top=top+'px';b.classList.add('on');
-  clearTimeout(b._h);b._h=setTimeout(()=>b.classList.remove('on'),3800);
-}
+
 (function(){
   const m=$('#mascot');let drag=null;
   m.addEventListener('pointerdown',e=>{const r=m.getBoundingClientRect();drag={x:e.clientX-r.left,y:e.clientY-r.top,sx:e.clientX,sy:e.clientY,moved:false};m.setPointerCapture(e.pointerId);m.style.cursor='grabbing'});
   m.addEventListener('pointermove',e=>{if(!drag)return;if(Math.abs(e.clientX-drag.sx)+Math.abs(e.clientY-drag.sy)>6)drag.moved=true;
     if(drag.moved){const x=Math.min(window.innerWidth-96,Math.max(0,e.clientX-drag.x)),y=Math.min(window.innerHeight-96,Math.max(0,e.clientY-drag.y));
       m.style.left=x+'px';m.style.top=y+'px';m.style.right='auto';m.style.bottom='auto';state.mpos={x,y}}});
-  m.addEventListener('pointerup',()=>{if(!drag)return;const moved=drag.moved;drag=null;m.style.cursor='grab';if(moved){save()}else{showBubble();hop()}});
+  m.addEventListener('pointerup',()=>{if(!drag)return;const moved=drag.moved;drag=null;m.style.cursor='grab';if(moved){save()}else{hop();$('#musicPanel').classList.toggle('on')}});
   $('#pic').addEventListener('change',e=>{
     const f=e.target.files[0];if(!f)return;
     const reader=new FileReader();
