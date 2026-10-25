@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A-Level Study Tracker v3</title>
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff7ec;--card:#fff;--ink:#2b2d42;--muted:#6b6f85;--accent:#ff7a59;--accent2:#ff4d8d;--ok:#2ec4a0;--bad:#ff4d6d;--line:#ffe1cc;--grad:linear-gradient(135deg,#ff7a59,#ff4d8d)}
+[data-theme=ocean]{--bg:#eef8ff;--card:#fff;--ink:#0b3954;--muted:#4a6a80;--accent:#0ea5e9;--accent2:#14b8a6;--line:#cdeafb;--grad:linear-gradient(135deg,#0ea5e9,#14b8a6)}
+[data-theme=lavender]{--bg:#f6f2ff;--card:#fff;--ink:#2e1f5e;--muted:#6d5fa0;--accent:#8b5cf6;--accent2:#ec4899;--line:#e4d9ff;--grad:linear-gradient(135deg,#8b5cf6,#ec4899)}
+[data-theme=dark]{--bg:#16131f;--card:#241f33;--ink:#f3efff;--muted:#a79fc4;--accent:#ff8a65;--accent2:#b388ff;--ok:#38d9a9;--bad:#ff6b8a;--line:#3a3352;--grad:linear-gradient(135deg,#ff8a65,#b388ff)}
+*{box-sizing:border-box}
+body{margin:0;font-family:Sarabun,system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+.wrap{max-width:760px;margin:0 auto;padding:16px 16px 120px}
+.hero{background:var(--grad);color:#fff;border-radius:24px;padding:22px;box-shadow:0 10px 30px rgba(0,0,0,.12)}
+.hero h1{margin:0 0 4px;font-size:24px;font-weight:800}
+.clock-now{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:6px}
+.sub{opacity:.9;font-size:14px}
+.stats{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.stat{flex:1;min-width:110px;background:rgba(255,255,255,.22);border-radius:16px;padding:10px 12px}
+.stat b{display:block;font-size:22px}
+.bar{height:10px;background:rgba(255,255,255,.3);border-radius:99px;margin-top:14px;overflow:hidden}
+.bar i{display:block;height:100%;background:#fff;border-radius:99px;transition:width .4s}
+.card{background:var(--card);border-radius:20px;padding:18px;margin-top:14px;border:2px solid var(--line)}
+.card h2{margin:0 0 12px;font-size:17px}
+.badge{display:inline-block;color:#fff;font-weight:700;font-size:13px;padding:4px 12px;border-radius:99px}
+.topic{font-size:20px;font-weight:800;margin:10px 0 6px;line-height:1.35}
+.muted{color:var(--muted);font-size:14px}
+.clock{font-size:44px;font-weight:800;font-variant-numeric:tabular-nums;text-align:center;margin:12px 0}
+.eta{text-align:center;background:var(--bg);border-radius:14px;padding:10px;font-weight:700}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center}
+.row.l{justify-content:flex-start}
+button,.btn{font-family:inherit;border:0;border-radius:14px;padding:11px 16px;font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;color:inherit}
+button:active{transform:scale(.97)}
+.b1{background:var(--accent);color:#fff}
+.b2{background:var(--ok);color:#fff}
+.b3{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.b4{background:var(--accent2);color:#fff}
+.banner{border-radius:18px;padding:14px 16px;margin-top:14px;background:#fff1c2;color:#6b4b00;border:2px solid #ffd76a;font-weight:600}
+[data-theme=dark] .banner{background:#3d3210;color:#ffe59a;border-color:#7a6418}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.ch{text-align:center;font-size:12px;color:var(--muted);font-weight:700;padding:4px 0}
+.cd{min-height:58px;border-radius:12px;padding:5px;font-size:11px;background:var(--bg);cursor:pointer;border:2px solid transparent;overflow:hidden}
+.cd.today{border-color:var(--accent)}
+.cd.sel{outline:3px solid var(--accent2)}
+.cd .n{font-weight:800;font-size:13px}
+.cd .s{display:inline-block;width:8px;height:8px;border-radius:99px;margin-right:2px}
+.cd.done{background:#d8f7ee;color:#0b6b52}
+.cd.miss{background:#ffe0e6;color:#9b1c3a}
+[data-theme=dark] .cd.done{background:#1d4a3d;color:#c9f5e6}
+[data-theme=dark] .cd.miss{background:#4d1f2a;color:#ffc2cf}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-weight:800}
+.item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.item:last-child{border:0}
+.item small{display:block;color:var(--muted)}
+.item button{padding:8px 12px;font-size:13px}
+.cov{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:14px}
+.cov div{padding:6px 8px;border-radius:10px;background:var(--bg)}
+.cov .ok{color:#0b6b52}
+[data-theme=dark] .cov .ok{color:#8ff0cf}
+.cov .gap{color:#b42344;font-weight:700}
+[data-theme=dark] .cov .gap{color:#ffb3c4}
+select,input{font-family:inherit;padding:9px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);font-size:14px}
+input{flex:1;min-width:200px}
+#modal{position:fixed;inset:0;background:rgba(20,15,35,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:9}
+#modal.on{display:flex}
+.sheet{background:var(--card);color:var(--ink);border-radius:24px;padding:22px;max-width:560px;width:100%;max-height:90vh;overflow:auto}
+.q{padding:14px 0;border-bottom:1px dashed var(--line)}
+.q p{margin:0 0 10px;font-weight:600;line-height:1.5}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;background:var(--bg);color:var(--ink);border:2px solid var(--line);font-weight:600}
+.opt.ok{background:#d8f7ee;border-color:var(--ok);color:#0b6b52}
+.opt.no{background:#ffe0e6;border-color:var(--bad);color:#9b1c3a}
+[data-theme=dark] .opt.ok{background:#1d4a3d;color:#c9f5e6}
+[data-theme=dark] .opt.no{background:#4d1f2a;color:#ffc2cf}
+.ex{font-size:14px;line-height:1.6;background:var(--bg);border-radius:14px;padding:10px 12px;margin-top:8px}
+.ex small{color:var(--muted)}
+.links a{background:var(--bg);color:var(--ink);border:2px solid var(--line);margin:4px}
+#mascot{position:fixed;right:10px;bottom:10px;width:150px;height:260px;display:flex;align-items:flex-end;justify-content:center;cursor:grab;touch-action:none;user-select:none;z-index:8}
+@keyframes hop{0%{transform:translateY(0)}30%{transform:translateY(-22px) rotate(-4deg)}60%{transform:translateY(0) rotate(3deg)}80%{transform:translateY(-6px)}100%{transform:none}}
+#mascot.hop{animation:hop .6s ease}
+#mascot img,#mascot svg{width:100%;height:100%;object-fit:contain;pointer-events:none}
+#bubble{position:fixed;max-width:220px;background:#fff;color:#2b2d42;border-radius:18px;padding:12px 14px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.2);display:none;z-index:8;font-size:15px;line-height:1.4}
+#bubble.on{display:block}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;font-weight:600;display:none;z-index:10;max-width:90%;text-align:center}
+.toast.on{display:block}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div id="mascot" title="ลากเพื่อย้าย · แตะเพื่อให้กำลังใจ">🌟</div>
+<div id="bubble"></div>
+<div id="modal"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+<input type="file" id="pic" accept="image/*" hidden>
+
+<script>
+const KEY='alevel-tracker-v3';
+const START=new Date(2026,9,26), EXAM=new Date(2027,2,13);
+const SUBJ={chem:['เคมี','#ff7a59'],phys:['ฟิสิกส์','#7c5cff'],bio:['ชีววิทยา','#2ec4a0'],mat:['คณิต 1','#ffb020'],eng:['อังกฤษ','#ff4d8d'],ts:['ไทย/สังคม','#14b8a6'],sat:['ข้อสอบเก่า','#0ea5e9']};
+const DOW={1:'chem',2:'phys',3:'bio',4:'mat',5:'eng',6:'sat',0:'ts'};
+const T={
+chem:["โมล + ปริมาณสัมพันธ์","สารละลาย/ความเข้มข้น + ปฏิบัติการเคมี (ความปลอดภัย)","อะตอม + ตารางธาตุ","พันธะเคมี","แก๊ส","อัตราการเกิดปฏิกิริยา","สมดุลเคมี","กรด–เบส","เคมีไฟฟ้า","เคมีอินทรีย์ 1 (ไฮโดรคาร์บอน)","เคมีอินทรีย์ 2 (หมู่ฟังก์ชัน) + พอลิเมอร์","โจทย์ผสม: ปริมาณสัมพันธ์/สารละลาย/แก๊ส","โจทย์ผสม: สมดุล/กรด–เบส/เคมีไฟฟ้า","โจทย์ผสม: อินทรีย์/พอลิเมอร์/พันธะ","ข้อสอบเก่า A-Level เคมี ปี 66–67","ข้อสอบเก่า ปี 68–69 + แก้ข้อผิด","ทวนจุดอ่อนจากสมุดข้อผิด","ข้อสอบจับเวลา 1 ชุด + ทวน","ทวนสรุป/สูตรทั้งหมด","ทวนเบา ๆ (ไม่เรียนใหม่)"],
+phys:["ธรรมชาติฟิสิกส์ + การเคลื่อนที่แนวตรง","แรงและกฎการเคลื่อนที่ + สมดุลกล","งานและพลังงานกล","โมเมนตัมและการชน","การเคลื่อนที่แนวโค้ง","การเคลื่อนที่แบบ SHM","คลื่น + เสียง","แสง","ไฟฟ้าสถิต","ไฟฟ้ากระแส","แม่เหล็กและไฟฟ้า + คลื่นแม่เหล็กไฟฟ้า","ความร้อนและแก๊ส","ของแข็งและของไหล","ฟิสิกส์อะตอม + นิวเคลียร์/อนุภาค","โจทย์ผสม: กลศาสตร์","โจทย์ผสม: ไฟฟ้า/แม่เหล็ก/คลื่น","ข้อสอบเก่า ฟิสิกส์ ปี 66–69","ข้อสอบจับเวลา 1 ชุด + แก้","ทวนสูตร/จุดอ่อน","ทวนเบา ๆ"],
+bio:["เคมีพื้นฐานของสิ่งมีชีวิต","โครงสร้างและการทำงานของเซลล์","การถ่ายทอดลักษณะทางพันธุกรรม","สารพันธุกรรม + การสังเคราะห์โปรตีน","การเปลี่ยนแปลงพันธุกรรม + เทคโนโลยีดีเอ็นเอ","วิวัฒนาการ + พันธุศาสตร์ประชากร","ระบบย่อยอาหาร + หมุนเวียนเลือด","ระบบน้ำเหลือง/ภูมิคุ้มกัน + ขับถ่าย","ระบบหายใจ + ประสาทและการเคลื่อนที่","ต่อมไร้ท่อ + สืบพันธุ์/เจริญเติบโต + พฤติกรรมสัตว์","พืช: เนื้อเยื่อ + แลกเปลี่ยนแก๊ส/ลำเลียง","พืช: สังเคราะห์แสง + สืบพันธุ์ + ควบคุมการเจริญเติบโต","ระบบนิเวศ/ไบโอม/ประชากร/ทรัพยากร","ความหลากหลาย + อนุกรมวิธาน","โจทย์ผสม: พันธุศาสตร์ + ระบบสัตว์","โจทย์ผสม: พืช + นิเวศ + กราฟ/ตาราง","ข้อสอบเก่า ชีววิทยา ปี 66–69","ข้อสอบจับเวลา 1 ชุด + แก้","ทวนจุดอ่อน","ทวนเบา ๆ"],
+mat:["เซต + ตรรกศาสตร์","จำนวนจริงและพหุนาม","ฟังก์ชัน","เอกซ์โพเนนเชียล + ลอการิทึม","ตรีโกณมิติ","จำนวนเชิงซ้อน","เมทริกซ์","ลำดับและอนุกรม","เรขาคณิตวิเคราะห์","เวกเตอร์ 3 มิติ","หลักการนับ + ความน่าจะเป็น","สถิติ + การแจกแจงความน่าจะเป็น","แคลคูลัส 1 (ลิมิต/อนุพันธ์)","แคลคูลัส 2 (อินทิกรัล)","โจทย์ผสม: พีชคณิต/ฟังก์ชัน/ตรี","โจทย์ผสม: เมทริกซ์/เวกเตอร์/แคลคูลัส/ความน่าจะเป็น","ข้อสอบเก่า คณิต 1 ปี 66–69","ข้อสอบจับเวลา 1 ชุด + แก้","ทวนจุดอ่อน","ทวนเบา ๆ"],
+eng:["ศัพท์ + ฟัง–พูด: บทสนทนาชีวิตประจำวัน","ศัพท์ + ฟัง–พูด: บทสนทนาชีวิตประจำวัน","ศัพท์ + ฟัง–พูด: บทสนทนาชีวิตประจำวัน","ศัพท์ + ฟัง–พูด: บทสนทนาชีวิตประจำวัน","การอ่าน: รีวิวสินค้า/บริการ","การอ่าน: รายงานข่าว","การอ่าน: บทความทั่วไป","การอ่าน: ภาพประกอบบทความ/อินโฟกราฟิก","การอ่าน: ผสมทุกแบบ จับเวลา","การเขียน/ไวยากรณ์ในบริบท","ฟัง–พูด: ฝึกสถานการณ์เพิ่ม","การอ่านเร็ว + ศัพท์","ข้อสอบเก่า อังกฤษ ปี 66–67","ข้อสอบเก่า ปี 68–69","ข้อสอบจับเวลา 1 ชุด","ข้อสอบจับเวลา 1 ชุด","ทวนศัพท์/จุดอ่อน","ทวนเบา ๆ","ข้อสอบจับเวลา 1 ชุด","ทวนเบา ๆ"],
+ts:["ไทย: อ่านจับใจความ/สรุปสาระสำคัญ","สังคม: ศาสนา ศีลธรรม จริยธรรม","ไทย: หลักการใช้ภาษา (สะกด/ประโยค/ชนิดของประโยคตามเจตนา)","สังคม: หน้าที่พลเมือง + การเมืองการปกครอง","ไทย: ตีความ/วิเคราะห์เจตนาผู้เขียน/อนุมาน","สังคม: เศรษฐศาสตร์","ไทย: ราชาศัพท์/สำนวน/คำทับศัพท์/ความหมายตรง–อุปมา","สังคม: ประวัติศาสตร์ไทย","ไทย: การเขียนเรียงความ/เรียงลำดับข้อความ/โต้แย้ง–โน้มน้าว","สังคม: ประวัติศาสตร์โลก","ไทย: การพูด–การฟัง + ระดับภาษา","สังคม: ภูมิศาสตร์","ไทย: ข้อสอบเก่า","สังคม: ข้อสอบเก่า","ไทย: ข้อสอบจับเวลา","สังคม: ข้อสอบจับเวลา","ไทย: ทวนจุดอ่อน","สังคม: ทวนจุดอ่อน","ไทย–สังคม: ทวนสรุป","พักผ่อน เตรียมสอบ"]
+};
+// ตรวจความครอบคลุม: หัวข้อทางการ (จากโครงสร้างข้อสอบที่ค้นได้) และคำค้นที่ควรปรากฏในแผน
+const COV={
+chem:{"อะตอม/ตารางธาตุ":["อะตอม"],"พันธะเคมี":["พันธะ"],"แก๊ส":["แก๊ส"],"เคมีอินทรีย์":["อินทรีย์"],"พอลิเมอร์":["พอลิเมอร์"],"โมล/ปริมาณสัมพันธ์":["โมล"],"สารละลาย":["สารละลาย"],"อัตราการเกิดปฏิกิริยา":["อัตรา"],"สมดุลเคมี":["สมดุล"],"กรด–เบส":["กรด"],"เคมีไฟฟ้า":["เคมีไฟฟ้า"],"ความปลอดภัย/ปฏิบัติการ":["ความปลอดภัย","ปฏิบัติการ"]},
+phys:{"ธรรมชาติฟิสิกส์":["ธรรมชาติ"],"การเคลื่อนที่แนวตรง":["แนวตรง"],"แรงและกฎนิวตัน":["แรง"],"สมดุลกล":["สมดุลกล"],"งานและพลังงาน":["งาน"],"โมเมนตัม":["โมเมนตัม"],"การเคลื่อนที่แนวโค้ง":["แนวโค้ง"],"SHM":["SHM"],"คลื่น":["คลื่น"],"เสียง":["เสียง"],"แสง":["แสง"],"ไฟฟ้าสถิต":["ไฟฟ้าสถิต"],"ไฟฟ้ากระแส":["ไฟฟ้ากระแส"],"แม่เหล็กไฟฟ้า":["แม่เหล็ก"],"ความร้อนและแก๊ส":["ความร้อน"],"ของแข็ง/ของไหล":["ของแข็ง","ของไหล"],"ฟิสิกส์อะตอม/นิวเคลียร์":["นิวเคลียร์"]},
+bio:{"เคมีพื้นฐาน":["เคมี"],"เซลล์":["เซลล์"],"ระบบย่อยอาหาร":["ย่อยอาหาร"],"ระบบหมุนเวียนเลือด":["เลือด"],"ระบบน้ำเหลือง/ภูมิคุ้มกัน":["ภูมิคุ้มกัน"],"ระบบขับถ่าย":["ขับถ่าย"],"ระบบหายใจ":["หายใจ"],"ระบบประสาท":["ประสาท"],"ต่อมไร้ท่อ":["ต่อมไร้ท่อ"],"ระบบสืบพันธุ์":["สืบพันธุ์"],"พฤติกรรมสัตว์":["พฤติกรรม"],"พืช (เนื้อเยื่อ/ลำเลียง/สังเคราะห์แสง)":["พืช"],"พันธุศาสตร์":["ถ่ายทอด"],"สารพันธุกรรม/โปรตีน":["สารพันธุกรรม"],"เทคโนโลยีดีเอ็นเอ":["ดีเอ็นเอ"],"วิวัฒนาการ":["วิวัฒนาการ"],"นิเวศ/ไบโอม":["ระบบนิเวศ"],"ประชากร":["ประชากร"],"ความหลากหลาย":["ความหลากหลาย"],"ทรัพยากรธรรมชาติ":["ทรัพยากร"]},
+mat:{"เซต/ตรรกศาสตร์":["เซต","ตรรกศาสตร์"],"จำนวนจริง/พหุนาม":["จำนวนจริง"],"ฟังก์ชัน":["ฟังก์ชัน"],"เอกซ์โพเนนเชียล/ลอการิทึม":["ลอการิทึม"],"ตรีโกณมิติ":["ตรีโกณ"],"จำนวนเชิงซ้อน":["เชิงซ้อน"],"เมทริกซ์":["เมทริกซ์"],"ลำดับและอนุกรม":["ลำดับ"],"เรขาคณิตวิเคราะห์":["เรขาคณิตวิเคราะห์"],"เวกเตอร์ 3 มิติ":["เวกเตอร์"],"หลักการนับ":["นับ"],"ความน่าจะเป็น":["ความน่าจะเป็น"],"สถิติ":["สถิติ"],"แคลคูลัส":["แคลคูลัส"]},
+eng:{"การฟัง":["ฟัง"],"การพูด":["พูด"],"การอ่าน":["อ่าน"],"การเขียน":["เขียน"],"ศัพท์":["ศัพท์"]},
+ts:{"อ่านจับใจความ/สรุป":["จับใจความ"],"การตีความ/เจตนาผู้เขียน":["ตีความ"],"หลักการใช้ภาษา (สะกด/ประโยค)":["สะกด"],"ชนิดของประโยคตามเจตนา":["ชนิดของประโยค"],"ระดับภาษา":["ระดับภาษา"],"ราชาศัพท์/สำนวน/ทับศัพท์":["ราชาศัพท์"],"ความหมายตรงและอุปมา":["อุปมา"],"การเขียนเรียงความ/โต้แย้ง/โน้มน้าว":["เรียงความ"],"การพูด–การฟัง":["พูด"],"ศาสนา/ศีลธรรม":["ศาสนา"],"หน้าที่พลเมือง/การเมือง":["หน้าที่พลเมือง"],"เศรษฐศาสตร์":["เศรษฐศาสตร์"],"ประวัติศาสตร์":["ประวัติศาสตร์"],"ภูมิศาสตร์":["ภูมิศาสตร์"]}
+};
+const BANK={
+"chem-0":[
+ {q:"มวลโมเลกุลของน้ำ H₂O เท่ากับเท่าไร (กำหนด H = 1, O = 16 g/mol)",c:["16 g/mol","18 g/mol","20 g/mol","32 g/mol"],a:1,ex:"H₂O = 2(1) + 16 = 18 g/mol",src:"ค่ามวลอะตอมจากตารางธาตุ (IUPAC)"},
+ {q:"1 โมลของอนุภาคใด ๆ มีจำนวนอนุภาคเท่ากับข้อใด",c:["6.02 × 10²²","6.02 × 10²³","6.02 × 10²⁴","1.00 × 10²³"],a:1,ex:"เลขอาโวกาโดร = 6.02 × 10²³ อนุภาคต่อโมล",src:"ตำราเคมีพื้นฐาน ระดับมัธยมปลาย (หัวข้อ 'โมล')"},
+ {q:"น้ำ 36 กรัม (H₂O = 18 g/mol) เท่ากับกี่โมล",c:["0.5 mol","1 mol","2 mol","18 mol"],a:2,ex:"จำนวนโมล = มวล ÷ มวลโมเลกุล = 36 ÷ 18 = 2 mol",src:"สูตร n = m/M จากตำราเคมีพื้นฐาน"}
+],
+"phys-1":[
+ {q:"วัตถุมวล 2 kg ถูกแรงลัพธ์ทำให้เร่ง 3 m/s² แรงลัพธ์มีค่าเท่าใด",c:["0.67 N","5 N","6 N","9 N"],a:2,ex:"จากกฎข้อ 2 ของนิวตัน F = ma = 2 × 3 = 6 N",src:"กฎการเคลื่อนที่ของนิวตัน (ตำราฟิสิกส์พื้นฐาน)"},
+ {q:"ตามกฎข้อที่ 3 ของนิวตัน แรงปฏิกิริยาและแรงกิริยามีลักษณะใด",c:["ขนาดเท่ากัน ทิศเดียวกัน","ขนาดเท่ากัน ทิศตรงข้ามกัน","ขนาดต่างกัน ทิศเดียวกัน","ขนาดต่างกัน ทิศตรงข้ามกัน"],a:1,ex:"แรงคู่กิริยา-ปฏิกิริยามีขนาดเท่ากัน ทิศตรงข้ามกัน และกระทำต่อวัตถุคนละชิ้น",src:"กฎการเคลื่อนที่ของนิวตัน ข้อ 3 (ตำราฟิสิกส์พื้นฐาน)"},
+ {q:"วัตถุหยุดนิ่งบนพื้นราบ แรงที่พื้นกระทำต่อวัตถุในแนวดิ่งเป็นอย่างไรเมื่อเทียบกับน้ำหนัก (ไม่มีแรงอื่น)",c:["มากกว่าน้ำหนัก","น้อยกว่าน้ำหนัก","เท่ากับน้ำหนัก ทิศขึ้น","เป็นศูนย์"],a:2,ex:"วัตถุอยู่นิ่ง แรงลัพธ์เป็นศูนย์ แรงปฏิกิริยาจากพื้นจึงเท่ากับน้ำหนักและมีทิศขึ้น",src:"สมดุลของแรง (ตำราฟิสิกส์พื้นฐาน)"}
+]
+};
+const MOTTO=["วันนี้ทำแค่ 1 บทก็เก่งแล้วนะ 💪","ทุกบทที่จบคือก้าวใกล้ฝันขึ้นอีกก้าว ✨","พักได้ แต่อย่าหยุดนะ เธอทำได้!","ค่อย ๆ ไป ไม่ต้องรีบ ขอแค่ไม่ทิ้งวันไหน 🌱","หมอในฝันกำลังรอเธออยู่นะ 🩺","เก่งมากที่เปิดแอปมาอ่านวันนี้ 🥹","ผิดได้ ทบทวนได้ แค่อย่ายอมแพ้ 📚","เหนื่อยก็พักแป๊บนึง แล้วกลับมาสู้ต่อ 🌟"];
+const defaults={done:{},sec:{},quiz:{},theme:'sunny',remHour:19,notif:false,lastRemind:'',lastOverdue:'',music:'',calM:null,target:60,mascot:'',mpos:null};
+let view='home';let state=load(),run=null,focus=null,calSel=null,calView=null,quizItem=null,quizState=null,mascotImg=null,targetWarned={};
+
+function load(){try{return Object.assign({},defaults,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){return Object.assign({},defaults)}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));return true}catch(e){return false}}
+function $(s){return document.querySelector(s)}
+function pad(n){return String(n).padStart(2,'0')}
+function ymd(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function sod(d){return new Date(d.getFullYear(),d.getMonth(),d.getDate())}
+function fdate(d){return d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'})}
+function fmt(s){s=Math.floor(s);return [Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(pad).join(':')}
+function hm(d){return pad(d.getHours())+':'+pad(d.getMinutes())}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2800)}
+
+function satText(w){const s=['เคมี','ฟิสิกส์','ชีววิทยา','คณิต 1','อังกฤษ'];
+  if(w<8)return 'โจทย์รวมบทที่เรียนสัปดาห์นี้ (วิชาที่ผิดเยอะสุด) + ทวนสมุดข้อผิด';
+  if(w<14)return 'โจทย์ผสมบท/ข้อสอบรายหมวด จับเวลา';
+  if(w<19)return 'ข้อสอบเก่าเต็มชุด: '+s[(w-14)%5]+' (จับเวลา 90 นาที) + ตรวจ/แก้';
+  return 'ข้อสอบเต็ม 1 วิชา (เบา) แล้วทวนสมุดข้อผิด';}
+function makeItem(w,dow){const off=dow===0?6:dow-1,key=DOW[dow];
+  return {id:w+'-'+dow,w,dow,key,topic:key==='sat'?satText(w):T[key][w],date:new Date(START.getFullYear(),START.getMonth(),START.getDate()+w*7+off)};}
+function weekOf(d){const diff=Math.floor((sod(d)-START)/86400000);if(diff<0)return -1;const w=Math.floor(diff/7);return w>19?-1:w}
+function itemFor(d){const w=weekOf(d);return w<0?null:makeItem(w,d.getDay())}
+function itemFromId(id){const [w,dow]=id.split('-').map(Number);return makeItem(w,dow)}
+function allItems(){const o=[];for(let w=0;w<20;w++)for(let d=0;d<7;d++)o.push(makeItem(w,d));return o.sort((a,b)=>a.date-b.date)}
+function overdue(){const n=sod(new Date());return allItems().filter(it=>it.date<n&&!state.done[it.id])}
+function pastCount(){const n=sod(new Date());return allItems().filter(it=>it.date<=n).length}
+function elapsed(id){return (state.sec[id]||0)+(run&&run.id===id?(Date.now()-run.t0)/1000:0)}
+function pauseRun(){if(run){state.sec[run.id]=(state.sec[run.id]||0)+(Date.now()-run.t0)/1000;run=null;save()}}
+function toggleRun(id){if(run&&run.id===id)pauseRun();else{pauseRun();run={id,t0:Date.now()}}render()}
+
+// ===== นาฬิกา =====
+function tickClock(){const n=new Date();const el=$('#clockNow');if(el)el.textContent=n.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});const d=$('#dateNow');if(d)d.textContent=fdate(n)}
+
+// ===== แบบทดสอบ =====
+function openQuiz(it){
+  pauseRun();quizItem=it;const b=BANK[it.key+'-'+it.w]||null;
+  quizState={mode:b?'mc':'self',qs:b||[0,1,2].map(i=>({q:['อธิบายแนวคิดหลักของ "'+it.topic+'" ให้คนอื่นฟังได้','ทำโจทย์ "'+it.topic+'" ได้อย่างน้อย 3 ข้อโดยไม่เปิดเฉลย','จำสูตรหรือข้อสำคัญของ "'+it.topic+'" ได้โดยไม่ดูสมุด'][i]})),ans:[],submitted:false};
+  renderQuiz();$('#modal').classList.add('on');
+}
+function renderQuiz(){
+  const s=quizState;let body='';
+  if(s.mode==='mc'){
+    body=s.qs.map((q,i)=>{const a=s.ans[i];
+      const opts=q.c.map((c,j)=>{let cls='opt';if(a!=null){if(j===q.a)cls+=' ok';else if(j===a)cls+=' no'}
+        return `<button class="${cls}" data-act="pick" data-q="${i}" data-c="${j}" ${a!=null?'disabled':''}>${String.fromCharCode(65+j)}. ${esc(c)}</button>`}).join('');
+      const exp=a!=null?`<div class="ex"><b>${a===q.a?'✅ ถูกต้อง':'❌ ยังไม่ถูก'}</b> · เฉลย ${String.fromCharCode(65+q.a)}<br>${esc(q.ex)}<br><small>📚 อ้างอิง: ${esc(q.src)}</small></div>`:'';
+      return `<div class="q"><p>${i+1}. ${esc(q.q)}</p>${opts}${exp}</div>`}).join('');
+  }else{
+    body=s.qs.map((q,i)=>`<div class="q"><p>${i+1}. ${esc(q.q)}</p><div class="row l">
+      <button class="${s.ans[i]===true?'b2':'b3'}" data-act="self" data-q="${i}" data-y="1">ทำได้</button>
+      <button class="${s.ans[i]===false?'b4':'b3'}" data-act="self" data-q="${i}" data-y="0">ยังไม่ได้</button></div></div>`).join('');
+  }
+  const answered=s.ans.filter(a=>a!=null).length;
+  const correct=s.mode==='mc'?s.ans.filter((a,i)=>a===s.qs[i].a).length:s.ans.filter(Boolean).length;
+  const foot=s.submitted?`<p><b>${correct>=2?'ผ่าน 🎉':'ยังไม่ผ่าน'}</b> — ได้ ${correct}/${s.qs.length} ${correct>=2?'บทนี้ถูกทำเครื่องหมายว่าเสร็จแล้ว':'ลองทบทวนตามคำอธิบายแล้วทำใหม่'}</p><div class="row"><button class="b2" data-act="qclose">ปิด</button></div>`
+  :`<div class="row"><button class="b1" data-act="qsubmit" ${answered<s.qs.length?'disabled style="opacity:.5"':''}>ส่งคำตอบ (${answered}/${s.qs.length})</button>
+      ${s.mode==='mc'?'<button class="b3" data-act="verify">🔍 คัดลอกไปให้ AI ตัวอื่นตรวจ</button>':''}<button class="b3" data-act="qclose">ไว้ทำทีหลัง</button></div>`;
+  $('#sheet').innerHTML=`<h2 style="margin:0 0 2px">แบบทดสอบท้ายบท</h2>
+    <div class="muted" style="margin-bottom:6px">${SUBJ[quizItem.key][0]} · ${esc(quizItem.topic)}</div>
+    ${s.mode==='self'?'<p class="muted" style="font-size:12px">บทนี้ยังไม่มีคลังคำถามที่ตรวจทานแล้ว จึงใช้แบบประเมินตัวเอง</p>':''}
+    ${body}<div style="margin-top:12px">${foot}</div>`;
+}
+function submitQuiz(){const s=quizState;const correct=s.mode==='mc'?s.ans.filter((a,i)=>a===s.qs[i].a).length:s.ans.filter(Boolean).length;
+  s.submitted=true;state.quiz[quizItem.id]=correct;if(correct>=2)state.done[quizItem.id]=true;save();renderQuiz()}
+function verifyPrompt(){
+  const it=quizItem;const qs=quizState.qs.map((q,i)=>`${i+1}. ${q.q}\n${q.c.map((c,j)=>String.fromCharCode(65+j)+'. '+c).join('\n')}\nเฉลยที่ระบบบันทึก: ${String.fromCharCode(65+q.a)}\nคำอธิบาย: ${q.ex}`).join('\n\n');
+  const text=`ช่วยตรวจสอบเฉลยและคำอธิบายของแบบทดสอบ A-Level นี้ทีละข้อ ระบุว่าถูกต้องหรือไม่ และแหล่งอ้างอิงที่ตรวจได้\nวิชา: ${SUBJ[it.key][0]} หัวข้อ: ${it.topic}\n\n${qs}`;
+  const ok=()=>toast('คัดลอกแล้ว วางในแชต AI ตัวอื่นได้เลย');
+  try{navigator.clipboard.writeText(text).then(ok).catch(()=>toast('คัดลอกไม่สำเร็จ ลองเลือกข้อความแล้วคัดลอกเอง'))}catch(e){toast('คัดลอกไม่สำเร็จ')}
+}
+function closeQuiz(){$('#modal').classList.remove('on');render()}
+
+// ===== ตัวจับเวลาและเวลาคาดว่าจะจบ =====
+function etaHtml(cur){
+  const target=state.target*60, el=elapsed(cur.id), rem=Math.max(0,target-el);
+  const now=new Date();const finish=new Date(now.getTime()+rem*1000);
+  const started=el>0||(run&&run.id===cur.id);
+  const msg=rem<=0?'🎉 ครบเวลาเป้าหมายแล้ว':`${started?'จะจบประมาณ':'ถ้าเริ่มตอนนี้ จะจบประมาณ'} <b>${hm(finish)} น.</b> · เหลือ ${Math.ceil(rem/60)} นาที`;
+  return `<div class="eta">${msg}</div>
+    <div class="row" style="margin-top:8px"><span class="muted">เป้าหมายบทนี้</span>
+    <select id="tgt">${[30,45,60,90,120].map(v=>`<option value="${v}" ${v===state.target?'selected':''}>${v} นาที</option>`).join('')}</select></div>`;
+}
+
+// ===== แจ้งเตือน =====
+function enableNotif(){
+  if(!('Notification' in window)){toast('เบราว์เซอร์นี้ไม่รองรับการแจ้งเตือน');return}
+  try{Notification.requestPermission().then(p=>{state.notif=p==='granted';save();toast(state.notif?'เปิดการแจ้งเตือนแล้ว':'ยังไม่ได้รับอนุญาต');render()}).catch(()=>toast('เปิดแจ้งเตือนไม่สำเร็จ'))}catch(e){toast('เปิดแจ้งเตือนไม่สำเร็จ')}
+}
+function fire(t,b){try{new Notification(t,{body:b})}catch(e){toast(t+' · '+b)}}
+function checkNotify(){
+  const now=new Date(),tk=ymd(now),today=itemFor(now),od=overdue();
+  if(run){const r=run;const target=state.target*60;if(elapsed(r.id)>=target&&!targetWarned[r.id]){targetWarned[r.id]=1;toast('ครบเวลาเป้าหมายของบทนี้แล้ว ลองทำแบบทดสอบได้เลย')}}
+  if(state.notif&&'Notification' in window&&Notification.permission==='granted'){
+    if(now.getHours()>=state.remHour&&state.lastRemind!==tk&&today&&!state.done[today.id]){fire('ถึงเวลาอ่าน '+SUBJ[today.key][0],today.topic);state.lastRemind=tk;save()}
+    if(od.length&&now.getHours()>=8&&state.lastOverdue!==tk){fire('มีบทค้าง '+od.length+' บท','เปิดแอปเพื่อทบทวนย้อนหลัง');state.lastOverdue=tk;save()}
+  }
+}
+
+// ===== ปฏิทิน =====
+function calendarHtml(){
+  const now=new Date();const base=calView||new Date(now.getFullYear(),now.getMonth(),1);
+  const y=base.getFullYear(),m=base.getMonth(),lead=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();
+  let cells='';for(let i=0;i<lead;i++)cells+='<div></div>';
+  for(let d=1;d<=days;d++){
+    const dt=new Date(y,m,d),it=itemFor(dt);let cls='cd';
+    if(ymd(dt)===ymd(now))cls+=' today';
+    if(calSel&&ymd(calSel)===ymd(dt))cls+=' sel';
+    let inner=`<div class="n">${d}</div>`;
+    if(it){if(state.done[it.id])cls+=' done';else if(dt<sod(now))cls+=' miss';
+      inner+=`<div style="margin-top:3px;line-height:1.25"><span class="s" style="background:${SUBJ[it.key][1]}"></span>${SUBJ[it.key][0]}</div>`}
+    cells+=`<div class="${cls}" data-act="cal" data-d="${d}">${inner}</div>`;
+  }
+  const names=['อา','จ','อ','พ','พฤ','ศ','ส'].map(x=>`<div class="ch">${x}</div>`).join('');
+  return `<div class="nav"><button class="b3" data-act="calnav" data-n="-1">‹</button><span>${base.toLocaleDateString('th-TH',{month:'long',year:'numeric'})}</span><button class="b3" data-act="calnav" data-n="1">›</button></div>
+    <div class="cal">${names}${cells}</div><p class="muted" style="font-size:12px">🟩 ทำเสร็จ · 🟥 เลยกำหนด · กรอบส้ม = วันนี้</p>`;
+}
+function daySel(){if(!calSel)return '';const it=itemFor(calSel);
+  if(!it)return `<p class="muted">${fdate(calSel)} ไม่มีแผนอ่าน</p>`;
+  const done=!!state.done[it.id];
+  return `<div class="item"><div><span class="badge" style="background:${SUBJ[it.key][1]}">${SUBJ[it.key][0]}</span><small>${fdate(calSel)} · สัปดาห์ ${it.w+1}</small><div style="font-weight:700;margin-top:4px">${esc(it.topic)}</div></div>
+    <button class="${done?'b3':'b1'}" data-act="focus" data-id="${it.id}">${done?'ดูบท':'เปิดบทนี้'}</button></div>`}
+
+// ===== ตรวจความครอบคลุม =====
+function coverageHtml(){
+  let ok=0,total=0,gaps=[];const rows=[];
+  for(const key of Object.keys(COV)){
+    const topics=T[key].join(' | ');
+    for(const [name,kws] of Object.entries(COV[key])){
+      total++;const hit=kws.some(k=>topics.includes(k));
+      if(hit)ok++;else gaps.push(SUBJ[key][0]+': '+name);
+      rows.push(`<div class="${hit?'ok':'gap'}">${hit?'✅':'⚠️'} ${SUBJ[key][0]} · ${name}</div>`);
+    }
+  }
+  const slots=`<p class="muted" style="font-size:13px;margin:12px 0 0">หมายเหตุ: ไทยและสังคมใช้ช่องสลับกันวันอาทิตย์ จึงได้วิชาละ 10 สัปดาห์ ควรเพิ่มบทโดยนับรวมการเรียนนอกตารางด้วย</p>`;
+  return `<p><b>ครอบคลุม ${ok}/${total} หัวข้อหลัก</b>${gaps.length?' · ยังขาด '+gaps.length+' หัวข้อ':' · ครบทุกหัวข้อที่ตรวจ'}</p>
+    <div class="cov">${rows.join('')}</div>${slots}
+    <p class="muted" style="font-size:12px">ตรวจจากโครงสร้างข้อสอบที่พบในบทความติว (ปี 2566–2567) ควรเทียบกับไฟล์ข้อสอบปี 2569 ที่ mytcas.com อีกครั้ง</p>`;
+}
+
+// ===== เพลง (เปิดเป็นลิงก์แท็บใหม่ เพราะเว็บนี้บล็อกการฝังเพลง) =====
+function ytEmbed(url){try{const u=new URL(url.trim());const list=u.searchParams.get('list');let id='';if(u.hostname==='youtu.be')id=u.pathname.slice(1);else if(u.hostname.includes('youtube.com'))id=u.searchParams.get('v')||'';if(list)return 'https://www.youtube-nocookie.com/embed/videoseries?list='+encodeURIComponent(list);if(id)return 'https://www.youtube-nocookie.com/embed/'+encodeURIComponent(id);}catch(e){}return ''}
+function musicHtml(){
+  return `<div class="row l"><input id="musicUrl" placeholder="วางลิงก์ YouTube หรือ Spotify" value="${esc(state.music||'')}">
+    <button class="b1" data-act="music">บันทึกลิงก์</button>${state.music?'<button class="b3" data-act="musicClear">ลบ</button>':''}</div>
+    ${state.music&&ytEmbed(state.music)?`<iframe src="${ytEmbed(state.music)}" style="width:100%;height:200px;border:0;border-radius:14px;margin-top:10px" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe>`:''}
+    ${state.music?`<div class="row l links" style="margin-top:10px"><a class="btn" href="${esc(state.music)}" target="_blank" rel="noopener">▶ เปิดเพลงในแท็บใหม่</a></div>`:''}
+    <p class="muted" style="font-size:12px">ผมไม่สามารถฝังเพลงให้เล่นในหน้าแอปได้ เพราะเว็บที่โฮสต์แอปบล็อกการฝัง YouTube/Spotify ไว้ จึงใช้ลิงก์เปิดในแท็บใหม่แทน</p>`;
+}
+
+// ===== หน้าหลัก =====
+function render(){
+  if(view!=='home'){renderCov();return}
+  const now=new Date(),od=overdue(),past=pastCount();
+  const doneCount=Object.keys(state.done).length;
+  const pct=past?Math.min(100,Math.round(doneCount/past*100)):0;
+  const todayMin=Math.floor(allItems().filter(it=>sod(it.date).getTime()===sod(now).getTime()).reduce((s,it)=>s+(state.sec[it.id]||0),0)/60);
+  const left=Math.max(0,Math.ceil((EXAM-sod(now))/86400000));
+  const cur=focus||itemFor(now);
+  let curHtml;
+  if(!cur){curHtml=now<START?`<p class="muted">แผนเริ่มจันทร์ ${fdate(START)} · เตรียมตัวได้เลย</p>`:'<p class="muted">แผนจบแล้ว ขอให้สอบได้ดั่งใจ</p>'}
+  else{
+    const c=SUBJ[cur.key][1],done=!!state.done[cur.id],running=run&&run.id===cur.id,isToday=ymd(cur.date)===ymd(now);
+    curHtml=`<span class="badge" style="background:${c}">${SUBJ[cur.key][0]}</span>
+      <span class="muted"> · สัปดาห์ ${cur.w+1} · ${fdate(cur.date)}${isToday?' (วันนี้)':''}</span>
+      <div class="topic">${esc(cur.topic)}</div>
+      <div class="clock" id="clock">${fmt(elapsed(cur.id))}</div>
+      ${done?'':etaHtml(cur)}
+      <div class="row" style="margin-top:10px">${done?`<button class="b3" data-act="undo" data-id="${cur.id}">ยกเลิกเสร็จ</button>`:
+        `<button class="${running?'b3':'b1'}" data-act="run" data-id="${cur.id}">${running?'⏸ หยุดชั่วคราว':'▶ เริ่มอ่าน'}</button>
+         <button class="b2" data-act="finish" data-id="${cur.id}">✔ อ่านจบ · ทำแบบทดสอบ</button>`}</div>
+      ${done?`<p class="muted" style="text-align:center">✅ เสร็จแล้ว (ได้ ${state.quiz[cur.id]??'-'}/3)</p>`:''}
+      ${focus?`<p style="text-align:center"><button class="b3" data-act="focus" data-id="">กลับไปบทของวันนี้</button></p>`:''}`;
+  }
+  $('#app').innerHTML=`
+  <div class="hero"><h1>📚 A-Level Study Tracker</h1>
+    <div class="clock-now" id="clockNow"></div><div class="sub" id="dateNow"></div>
+    <div class="sub" style="margin-top:6px">เหลืออีก ${left} วันถึงวันสอบ 13 มี.ค. 2570</div>
+    <div class="stats"><div class="stat"><b>${doneCount}</b>บทที่ทำเสร็จ</div><div class="stat"><b>${todayMin}</b>นาทีวันนี้</div><div class="stat"><b>${od.length}</b>บทค้าง</div></div>
+    <div class="bar"><i style="width:${pct}%"></i></div></div>
+  ${od.length?`<div class="banner">⚠ มีบทค้าง ${od.length} บท — ลองทบทวนก่อนเริ่มบทใหม่</div>`:''}
+  <div class="card"><h2>📖 วันนี้ / บทที่เลือก</h2>${curHtml}</div>
+  <div class="card"><h2>🗓 ปฏิทินแผนอ่าน</h2>${calendarHtml()}${daySel()}</div>
+  ${od.length?`<div class="card"><h2>⏰ บทค้าง (${od.length})</h2>${od.slice(0,12).map(it=>`<div class="item"><div><span class="badge" style="background:${SUBJ[it.key][1]}">${SUBJ[it.key][0]}</span><small>${fdate(it.date)} · ${esc(it.topic)}</small></div><button class="b1" data-act="focus" data-id="${it.id}">ทำเลย</button></div>`).join('')}${od.length>12?`<p class="muted">และอีก ${od.length-12} บท</p>`:''}</div>`:''}
+  <div class="card"><button class="b1" data-act="openCov" style="width:100%">🔍 ตรวจความครอบคลุมรายวิชา</button></div>
+  <div class="card"><h2>🎵 เพลงระหว่างอ่าน</h2>${musicHtml()}</div>
+  <div class="card"><h2>⚙️ ตั้งค่า</h2>
+    <div class="row l">
+      <button class="b3" data-act="theme" data-v="sunny">☀️ ครีมส้ม</button>
+      <button class="b3" data-act="theme" data-v="ocean">🌊 ฟ้าทะเล</button>
+      <button class="b3" data-act="theme" data-v="lavender">💜 ลาเวนเดอร์</button>
+      <button class="b3" data-act="theme" data-v="dark">🌙 ดาร์ก</button></div>
+    <div class="row l" style="margin-top:12px">
+      <select id="rem">${Array.from({length:9},(_,i)=>i+14).map(h=>`<option value="${h}" ${h===state.remHour?'selected':''}>เตือน ${h}:00 น.</option>`).join('')}</select>
+      <button class="${state.notif?'b2':'b1'}" data-act="notif">${state.notif?'🔔 แจ้งเตือนเปิดอยู่':'🔔 เปิดการแจ้งเตือน'}</button>
+      <button class="b3" data-act="pic">🖼 เปลี่ยนรูปตัวการ์ตูน</button></div>
+    <p class="muted" style="font-size:12px">ข้อมูลเก็บในเบราว์เซอร์ของเครื่องนี้เท่านั้น</p></div>`;
+  const rem=$('#rem');if(rem)rem.onchange=e=>{state.remHour=+e.target.value;save()};
+  const tg=$('#tgt');if(tg)tg.onchange=e=>{state.target=+e.target.value;save();render()};
+  const mu=$('#musicUrl');if(mu)mu.onkeydown=e=>{if(e.key==='Enter')$('[data-act=music]').click()};
+  document.body.dataset.theme=state.theme==='sunny'?'':state.theme;
+  tickClock();
+}
+
+// ===== หน้าตรวจความครอบคลุม (แยกหน้า) =====
+function renderCov(){
+  const k=view.startsWith('cov:')?view.slice(4):null;
+  const head=t=>`<div class="hero"><h1>${t}</h1></div>`;
+  if(!k){
+    const cards=Object.keys(COV).map(key=>{
+      const names=Object.keys(COV[key]);
+      const hit=names.filter(n=>COV[key][n].some(x=>T[key].join('|').includes(x))).length;
+      const pct=Math.round(hit/names.length*100);
+      return `<div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><div style="flex:1;min-width:200px"><span class="badge" style="background:${SUBJ[key][1]}">${SUBJ[key][0]}</span><div style="margin-top:8px;font-weight:700">ครอบคลุม ${hit}/${names.length} หัวข้อ</div><div class="bar" style="background:var(--line)"><i style="width:${pct}%;background:${SUBJ[key][1]}"></i></div></div><button class="b1" data-act="covSub" data-k="${key}">ตรวจ ›</button></div>`;
+    }).join('');
+    $('#app').innerHTML=`<div class="row l"><button class="b3" data-act="covBack">‹ กลับหน้าแรก</button></div>`+head('🔍 ตรวจความครอบคลุม')+cards+`<div class="card"><p class="muted" style="margin:0">ตรวจจากโครงสร้างข้อสอบที่พบในบทความติว (ปี 2566–2567) ควรเทียบกับไฟล์ข้อสอบปี 2569 ที่ mytcas.com อีกครั้ง</p></div>`;
+  }else{
+    const rows=Object.entries(COV[k]).map(([name,kws])=>{
+      const weeks=[];T[k].forEach((t,w)=>{if(kws.some(x=>t.includes(x)))weeks.push(w+1)});
+      return `<div class="item"><div><b>${weeks.length?'✅':'⚠️'} ${name}</b><small>${weeks.length?'อยู่ในแผนสัปดาห์ '+weeks.join(', '):'ยังไม่มีในแผน — ควรเพิ่ม'}</small></div></div>`;
+    }).join('');
+    const ok=Object.values(COV[k]).filter(kws=>T[k].some(t=>kws.some(x=>t.includes(x)))).length;
+    $('#app').innerHTML=`<div class="row l"><button class="b3" data-act="covBack">‹ กลับหน้าตรวจรายวิชา</button></div>`+head(SUBJ[k][0])+`<div class="card"><h2>ครอบคลุม ${ok}/${Object.keys(COV[k]).length} หัวข้อ</h2>${rows}</div>`;
+  }
+  document.body.dataset.theme=state.theme==='sunny'?'':state.theme;
+}
+// ===== ตัวการ์ตูนให้กำลังใจ (ลากได้ แตะเพื่อดูข้อความ) =====
+const DEFAULT_MASCOT=`<svg viewBox="0 0 150 260" xmlns="http://www.w3.org/2000/svg"><ellipse cx="75" cy="252" rx="42" ry="6" fill="#0002"/><rect x="52" y="200" width="16" height="44" rx="7" fill="#3a3352"/><rect x="82" y="200" width="16" height="44" rx="7" fill="#3a3352"/><ellipse cx="60" cy="246" rx="13" ry="7" fill="#ff7a59"/><ellipse cx="90" cy="246" rx="13" ry="7" fill="#ff7a59"/><rect x="40" y="112" width="70" height="98" rx="26" fill="#ff7a59"/><rect x="44" y="150" width="62" height="6" fill="#fff" opacity=".8"/><rect x="18" y="120" width="22" height="64" rx="11" fill="#ff7a59"/><rect x="110" y="120" width="22" height="64" rx="11" fill="#ff7a59"/><rect x="88" y="135" width="36" height="46" rx="4" fill="#7c5cff"/><rect x="92" y="139" width="28" height="38" rx="2" fill="#fff"/><circle cx="27" cy="186" r="9" fill="#ffd9b8"/><circle cx="125" cy="180" r="9" fill="#ffd9b8"/><circle cx="75" cy="78" r="46" fill="#ffd9b8"/><path d="M29 76 Q32 26 75 28 Q118 26 121 76 Q110 50 75 52 Q42 50 29 76Z" fill="#2b2d42"/><circle cx="58" cy="82" r="5" fill="#2b2d42"/><circle cx="92" cy="82" r="5" fill="#2b2d42"/><circle cx="60" cy="80" r="1.6" fill="#fff"/><circle cx="94" cy="80" r="1.6" fill="#fff"/><path d="M62 100 Q75 112 88 100" stroke="#2b2d42" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="48" cy="96" r="5" fill="#ff8fa3" opacity=".7"/><circle cx="102" cy="96" r="5" fill="#ff8fa3" opacity=".7"/></svg>`;
+function hop(){const m=$('#mascot');m.classList.remove('hop');void m.offsetWidth;m.classList.add('hop')}
+function renderMascot(){
+  const m=$('#mascot');
+  m.innerHTML=mascotImg?`<img src="${mascotImg}" alt="">`:DEFAULT_MASCOT;
+  if(state.mpos){m.style.left=state.mpos.x+'px';m.style.top=state.mpos.y+'px';m.style.right='auto';m.style.bottom='auto'}
+}
+function showBubble(){
+  const b=$('#bubble'),m=$('#mascot');
+  b.textContent=MOTTO[Math.floor(Math.random()*MOTTO.length)];
+  const r=m.getBoundingClientRect();
+  const left=Math.min(window.innerWidth-240,Math.max(8,r.left-60)),top=Math.max(8,r.top-90);
+  b.style.left=left+'px';b.style.top=top+'px';b.classList.add('on');
+  clearTimeout(b._h);b._h=setTimeout(()=>b.classList.remove('on'),3800);
+}
+(function(){
+  const m=$('#mascot');let drag=null;
+  m.addEventListener('pointerdown',e=>{const r=m.getBoundingClientRect();drag={x:e.clientX-r.left,y:e.clientY-r.top,sx:e.clientX,sy:e.clientY,moved:false};m.setPointerCapture(e.pointerId);m.style.cursor='grabbing'});
+  m.addEventListener('pointermove',e=>{if(!drag)return;if(Math.abs(e.clientX-drag.sx)+Math.abs(e.clientY-drag.sy)>6)drag.moved=true;
+    if(drag.moved){const x=Math.min(window.innerWidth-96,Math.max(0,e.clientX-drag.x)),y=Math.min(window.innerHeight-96,Math.max(0,e.clientY-drag.y));
+      m.style.left=x+'px';m.style.top=y+'px';m.style.right='auto';m.style.bottom='auto';state.mpos={x,y}}});
+  m.addEventListener('pointerup',()=>{if(!drag)return;const moved=drag.moved;drag=null;m.style.cursor='grab';if(moved){save()}else{showBubble();hop()}});
+  $('#pic').addEventListener('change',e=>{
+    const f=e.target.files[0];if(!f)return;
+    const reader=new FileReader();
+    reader.onload=()=>{const img=new Image();img.onload=()=>{
+      const s=Math.min(1,256/Math.max(img.width,img.height));const c=document.createElement('canvas');
+      c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      const data=c.toDataURL('image/jpeg',0.85);mascotImg=data;renderMascot();
+      state.mascot=data;const ok=save();
+      toast(ok?'เปลี่ยนรูปแล้ว แตะรูปเพื่อดูข้อความให้กำลังใจ':'เปลี่ยนรูปได้ แต่บันทึกไม่สำเร็จ (พื้นที่ไม่พอหรือเบราว์เซอร์บล็อก) รูปจะหายเมื่อปิดแอป');
+    };img.onerror=()=>toast('ไฟล์นี้เปิดไม่ได้ ลองเป็น JPG หรือ PNG');img.src=reader.result};
+    reader.readAsDataURL(f);e.target.value='';
+  });
+})();
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b)return;
+  const a=b.dataset.act,id=b.dataset.id;
+  if(a==='run')toggleRun(id);
+  else if(a==='finish')openQuiz(id?itemFromId(id):itemFor(new Date()));
+  else if(a==='focus'){focus=id?itemFromId(id):null;const t=itemFor(new Date());if(focus&&t&&focus.id===t.id)focus=null;if(id){const it=itemFromId(id);calSel=it.date;calView=new Date(it.date.getFullYear(),it.date.getMonth(),1)}render();window.scrollTo({top:0,behavior:'smooth'})}
+  else if(a==='undo'){delete state.done[id];save();render()}
+  else if(a==='theme'){state.theme=b.dataset.v;save();render()}
+  else if(a==='notif')enableNotif();
+  else if(a==='pic')$('#pic').click();
+  else if(a==='cal'){const now=new Date();const base=calView||new Date(now.getFullYear(),now.getMonth(),1);calSel=new Date(base.getFullYear(),base.getMonth(),+b.dataset.d);render()}
+  else if(a==='calnav'){const now=new Date();const base=calView||new Date(now.getFullYear(),now.getMonth(),1);calView=new Date(base.getFullYear(),base.getMonth()+ +b.dataset.n,1);render()}
+  else if(a==='music'){const v=$('#musicUrl').value.trim();if(!v){toast('วางลิงก์ก่อนนะ');return}state.music=v;save();render()}
+  else if(a==='musicClear'){state.music='';save();render()}
+  else if(a==='pick'){const q=+b.dataset.q;if(quizState.ans[q]==null){quizState.ans[q]=+b.dataset.c;renderQuiz()}}
+  else if(a==='self'){quizState.ans[+b.dataset.q]=b.dataset.y==='1';renderQuiz()}
+  else if(a==='openCov'){view='cov';render();window.scrollTo({top:0})}
+  else if(a==='covSub'){view='cov:'+b.dataset.k;render();window.scrollTo({top:0})}
+  else if(a==='covBack'){view=view.startsWith('cov:')?'cov':'home';render();window.scrollTo({top:0})}
+  else if(a==='verify')verifyPrompt();
+  else if(a==='qsubmit')submitQuiz();
+  else if(a==='qclose')closeQuiz();
+});
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeQuiz()});
+
+if(state.mascot)mascotImg=state.mascot;
+renderMascot();
+render();
+setInterval(()=>{tickClock();if(run){const el=$('#clock');if(el)el.textContent=fmt(elapsed(run.id))}},1000);
+setInterval(checkNotify,30000);checkNotify();
+</script>
+</body>
+</html>
